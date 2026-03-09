@@ -247,6 +247,11 @@
   .fullstack .card-category { background: rgba(197,163,255,0.1); color: var(--fullstack); }
   .fullstack::before { background: var(--fullstack); }
 
+
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .lang-toggle { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 4px; flex-shrink: 0; margin-top: 4px; }
+  .lang-btn { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; padding: 6px 14px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--muted); }
+  .lang-btn.active { background: var(--accent); color: #fff; }
   .noise {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -261,19 +266,27 @@
 <div class="noise"></div>
 
 <header>
-  <div class="header-tag">// technical reference 2026</div>
-  <h1>Stacks Map</h1>
-  <p class="subtitle">Linguagens, frameworks e ecossistemas — para que servem, vantagens e desvantagens</p>
-  <p style="font-size:11px;color:var(--muted);margin-bottom:8px;max-width:640px;line-height:1.7;">⚠ Python é uma linguagem de propósito geral, não um framework. Sua classificação depende do que está sendo usado sobre ele: Django é fullstack, FastAPI é backend puro, Streamlit e Gradio são ferramentas de dados.</p>
+  <div class="header-top">
+    <div>
+      <div class="header-tag" id="header-tag">// technical reference 2026</div>
+      <h1>Stacks Map</h1>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-btn" onclick="setLang('pt')" id="btn-pt">PT</button>
+      <button class="lang-btn active" onclick="setLang('en')" id="btn-en">EN</button>
+    </div>
+  </div>
+  <p class="subtitle" id="subtitle">Languages, frameworks and ecosystems — what they do, advantages and disadvantages</p>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:8px;max-width:640px;line-height:1.7;" id="python-note">⚠ Python is a general-purpose language, not a framework. Its classification depends on what's built on top of it: Django is fullstack, FastAPI is pure backend, Streamlit and Gradio are data tools.</p>
 </header>
 
 <div class="legend">
-  <div class="legend-item active" onclick="filter('all')"><span class="legend-dot" style="background:#7c6aff"></span>TODAS</div>
+  <div class="legend-item active" onclick="filter('all')"><span class="legend-dot" style="background:#7c6aff"></span><span id="leg-all">ALL</span></div>
   <div class="legend-item" onclick="filter('fe')"><span class="legend-dot" style="background:var(--fe)"></span>FRONTEND</div>
   <div class="legend-item" onclick="filter('be')"><span class="legend-dot" style="background:var(--be)"></span>BACKEND</div>
   <div class="legend-item" onclick="filter('fullstack')"><span class="legend-dot" style="background:var(--fullstack)"></span>FULLSTACK</div>
   <div class="legend-item" onclick="filter('mobile')"><span class="legend-dot" style="background:var(--mobile)"></span>MOBILE</div>
-  <div class="legend-item" onclick="filter('data')"><span class="legend-dot" style="background:var(--data)"></span>DADOS & IA</div>
+  <div class="legend-item" onclick="filter('data')"><span class="legend-dot" style="background:var(--data)"></span><span id="leg-data">DATA & AI</span></div>
   <div class="legend-item" onclick="filter('infra')"><span class="legend-dot" style="background:var(--infra)"></span>INFRA & DEVOPS</div>
 </div>
 
@@ -427,32 +440,73 @@ const stacks = [
   },
 ];
 
+let currentLang = 'en';
+let currentFilter = 'all';
+
+const i18n = {
+  en: {
+    headerTag: '// technical reference 2026',
+    subtitle: 'Languages, frameworks and ecosystems — what they do, advantages and disadvantages',
+    pythonNote: "⚠ Python is a general-purpose language, not a framework. Its classification depends on what's built on top of it: Django is fullstack, FastAPI is pure backend, Streamlit and Gradio are data tools.",
+    legAll: 'ALL', legData: 'DATA & AI',
+    indicatedFor: 'BEST FOR', advantages: 'ADVANTAGES', disadvantages: 'DISADVANTAGES',
+  },
+  pt: {
+    headerTag: '// referência técnica 2026',
+    subtitle: 'Linguagens, frameworks e ecossistemas — para que servem, vantagens e desvantagens',
+    pythonNote: '⚠ Python é uma linguagem de propósito geral, não um framework. Sua classificação depende do que está sendo usado sobre ele: Django é fullstack, FastAPI é backend puro, Streamlit e Gradio são ferramentas de dados.',
+    legAll: 'TODAS', legData: 'DADOS & IA',
+    indicatedFor: 'INDICADO PARA', advantages: 'VANTAGENS', disadvantages: 'DESVANTAGENS',
+  }
+};
+
+const catLabels = {
+  en: { fe: 'Frontend', be: 'Backend', fullstack: 'Fullstack', mobile: 'Mobile', data: 'Data & AI', infra: 'Infra & DevOps' },
+  pt: { fe: 'Frontend', be: 'Backend', fullstack: 'Fullstack', mobile: 'Mobile', data: 'Dados & IA', infra: 'Infra & DevOps' }
+};
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btn-pt').classList.toggle('active', lang === 'pt');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  const t = i18n[lang];
+  document.getElementById('header-tag').textContent = t.headerTag;
+  document.getElementById('subtitle').textContent = t.subtitle;
+  document.getElementById('python-note').textContent = t.pythonNote;
+  document.getElementById('leg-all').textContent = t.legAll;
+  document.getElementById('leg-data').textContent = t.legData;
+  render();
+}
+
 function render(filter = 'all') {
+  if (filter !== 'all' || currentFilter) currentFilter = filter;
+  const lang = currentLang;
+  const t = i18n[lang];
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
 
   stacks.forEach(s => {
-    const show = filter === 'all' || s.cat === filter;
+    const show = currentFilter === 'all' || s.cat === currentFilter;
     const card = document.createElement('div');
     card.className = `card ${s.cat} ${show ? '' : 'hidden'}`;
     card.innerHTML = `
       <div class="card-header">
         <span class="card-icon">${s.icon}</span>
-        <span class="card-category">${catLabel(s.cat)}</span>
+        <span class="card-category">${catLabels[lang][s.cat]}</span>
       </div>
       <div class="card-name">${s.name}</div>
       <div class="card-subtitle">${s.sub}</div>
       <div class="card-desc">${s.desc}</div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;">INDICADO PARA</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;">${t.indicatedFor}</div>
       <div class="card-desc" style="margin-bottom:16px;">${s.use}</div>
-      <div class="tags">${s.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      <div class="tags">${s.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
       <div class="pros-cons">
         <div class="pros">
-          <div class="pros-cons-title pro-title">VANTAGENS</div>
+          <div class="pros-cons-title pro-title">${t.advantages}</div>
           <ul>${s.pros.map(p => `<li>${p}</li>`).join('')}</ul>
         </div>
         <div class="cons">
-          <div class="pros-cons-title con-title">DESVANTAGENS</div>
+          <div class="pros-cons-title con-title">${t.disadvantages}</div>
           <ul>${s.cons.map(c => `<li>${c}</li>`).join('')}</ul>
         </div>
       </div>
@@ -461,18 +515,14 @@ function render(filter = 'all') {
   });
 }
 
-function catLabel(cat) {
-  const map = { fe: 'Frontend', be: 'Backend', fullstack: 'Fullstack', mobile: 'Mobile', data: 'Dados & IA', infra: 'Infra & DevOps' };
-  return map[cat] || cat;
-}
-
 function filter(cat) {
+  currentFilter = cat;
   document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('active'));
   event.currentTarget.classList.add('active');
   render(cat);
 }
 
-render();
+render('all');
 </script>
 
 <footer style="margin: 0; padding: 64px 48px; border-top: 1px solid #1e1e2e; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; background: #0d0d14;">

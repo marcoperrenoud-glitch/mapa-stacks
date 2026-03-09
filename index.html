@@ -254,6 +254,60 @@
   .lang-toggle { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 4px; flex-shrink: 0; margin-top: 4px; }
   .lang-btn { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; padding: 6px 14px; border-radius: 4px; border: none; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--muted); }
   .lang-btn.active { background: var(--accent); color: #fff; }
+
+  /* ── Mobile ── */
+  @media (max-width: 768px) {
+    header { padding: 24px 20px 0; }
+    .legend { padding: 0 20px 24px; gap: 8px; display: none; }
+    .legend.open { display: flex; }
+    .grid { padding: 0 20px 80px; }
+    .pros-cons { grid-template-columns: 1fr; }
+    .card { padding: 20px; }
+    footer { padding: 40px 20px; grid-template-columns: 1fr; gap: 32px; }
+    .lang-toggle { margin-top: 0; }
+    h1 { font-size: clamp(28px, 8vw, 42px); }
+  }
+
+  /* ── Botão flutuante filtros ── */
+  .fab {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 4px 20px rgba(124,106,255,0.4);
+    transition: all 0.2s;
+  }
+  .fab:hover { background: #6a58e8; transform: translateY(-2px); }
+  @media (max-width: 768px) { .fab { display: flex; align-items: center; gap: 8px; } }
+
+  /* ── Overlay filtros mobile ── */
+  .legend-overlay {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #111118;
+    border-top: 1px solid #1e1e2e;
+    padding: 20px;
+    z-index: 998;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.4);
+  }
+  .legend-overlay.open { display: flex; }
+  .legend-overlay .legend-item { font-size: 13px; padding: 10px 16px; }
+  .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .overlay-title { font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; }
+  .overlay-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; line-height: 1; }
   .noise {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -293,6 +347,25 @@
 </div>
 
 <div class="grid" id="grid"></div>
+
+
+<button class="fab" id="fab-btn" onclick="toggleOverlay()">
+  <span>⊞</span> FILTERS
+</button>
+
+<div class="legend-overlay" id="legend-overlay">
+  <div class="overlay-header">
+    <span class="overlay-title" id="overlay-title">FILTERS</span>
+    <button class="overlay-close" onclick="toggleOverlay()">×</button>
+  </div>
+  <div class="legend-item active" onclick="filterMobile('all')"><span class="legend-dot" style="background:#7c6aff"></span><span id="mob-all">ALL</span></div>
+  <div class="legend-item" onclick="filterMobile('fe')"><span class="legend-dot" style="background:var(--fe)"></span><span id="mob-fe">FRONTEND</span></div>
+  <div class="legend-item" onclick="filterMobile('be')"><span class="legend-dot" style="background:var(--be)"></span><span id="mob-be">BACKEND</span></div>
+  <div class="legend-item" onclick="filterMobile('fullstack')"><span class="legend-dot" style="background:var(--fullstack)"></span><span id="mob-fs">FULLSTACK</span></div>
+  <div class="legend-item" onclick="filterMobile('mobile')"><span class="legend-dot" style="background:var(--mobile)"></span><span id="mob-mob">MOBILE</span></div>
+  <div class="legend-item" onclick="filterMobile('data')"><span class="legend-dot" style="background:var(--data)"></span><span id="mob-data">DATA & AI</span></div>
+  <div class="legend-item" onclick="filterMobile('infra')"><span class="legend-dot" style="background:var(--infra)"></span><span id="mob-infra">INFRA & DEVOPS</span></div>
+</div>
 
 <footer style="margin: 0; padding: 64px 48px; border-top: 1px solid #1e1e2e; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; background: #0d0d14;">
 
@@ -516,6 +589,16 @@ function setLang(lang) {
   document.getElementById('comment-placeholder').placeholder = t.commentPlaceholder;
   document.getElementById('name-placeholder').placeholder = t.namePlaceholder;
   document.getElementById('submit-btn').textContent = t.submitBtn;
+  // mobile overlay labels
+  document.getElementById('mob-all').textContent = t.legAll;
+  document.getElementById('mob-fe').textContent = t.legFe;
+  document.getElementById('mob-be').textContent = t.legBe;
+  document.getElementById('mob-fs').textContent = t.legFullstack;
+  document.getElementById('mob-mob').textContent = t.legMobile;
+  document.getElementById('mob-data').textContent = t.legData;
+  document.getElementById('mob-infra').textContent = t.legInfra;
+  document.getElementById('fab-btn').innerHTML = '<span>⊞</span> ' + (lang === 'pt' ? 'FILTROS' : 'FILTERS');
+  document.getElementById('overlay-title').textContent = lang === 'pt' ? 'FILTROS' : 'FILTERS';
   render(currentFilter);
 }
 
@@ -578,6 +661,34 @@ function filter(cat) {
   currentFilter = cat;
   document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('active'));
   event.currentTarget.classList.add('active');
+  render(cat);
+  if (cat !== 'all') {
+    setTimeout(() => {
+      const section = document.getElementById('section-' + cat);
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+
+function toggleOverlay() {
+  document.getElementById('legend-overlay').classList.toggle('open');
+}
+
+function filterMobile(cat) {
+  // sync com legend desktop
+  currentFilter = cat;
+  document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('active'));
+  // mark active no overlay
+  const overlayItems = document.querySelectorAll('#legend-overlay .legend-item');
+  overlayItems.forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  // mark active no desktop legend
+  const desktopItems = document.querySelectorAll('.legend:not(.legend-overlay) .legend-item');
+  if (cat === 'all') desktopItems[0] && desktopItems[0].classList.add('active');
+  toggleOverlay();
   render(cat);
   if (cat !== 'all') {
     setTimeout(() => {

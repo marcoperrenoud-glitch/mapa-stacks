@@ -519,6 +519,8 @@ function setLang(lang) {
   render(currentFilter);
 }
 
+const catOrder = ['fe', 'fullstack', 'be', 'mobile', 'data', 'infra'];
+
 function render(filter) {
   if (filter !== undefined) currentFilter = filter;
   const lang = currentLang;
@@ -526,33 +528,49 @@ function render(filter) {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
 
-  stacks.forEach(s => {
-    const show = currentFilter === 'all' || s.cat === currentFilter;
-    const card = document.createElement('div');
-    card.className = `card ${s.cat} ${show ? '' : 'hidden'}`;
-    card.innerHTML = `
-      <div class="card-header">
-        <span class="card-icon">${s.icon}</span>
-        <span class="card-category">${catLabels[lang][s.cat]}</span>
-      </div>
-      <div class="card-name">${s.name}</div>
-      <div class="card-subtitle">${s.sub}</div>
-      <div class="card-desc">${s.desc[lang]}</div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;">${t.indicatedFor}</div>
-      <div class="card-desc" style="margin-bottom:16px;">${s.use[lang]}</div>
-      <div class="tags">${s.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
-      <div class="pros-cons">
-        <div class="pros">
-          <div class="pros-cons-title pro-title">${t.advantages}</div>
-          <ul>${s.pros[lang].map(p => `<li>${p}</li>`).join('')}</ul>
-        </div>
-        <div class="cons">
-          <div class="pros-cons-title con-title">${t.disadvantages}</div>
-          <ul>${s.cons[lang].map(c => `<li>${c}</li>`).join('')}</ul>
-        </div>
-      </div>
+  const cats = currentFilter === 'all' ? catOrder : [currentFilter];
+
+  cats.forEach(cat => {
+    const catStacks = stacks.filter(s => s.cat === cat);
+    if (!catStacks.length) return;
+
+    // Section header
+    const section = document.createElement('div');
+    section.id = 'section-' + cat;
+    section.style.cssText = 'grid-column: 1 / -1; padding: 32px 0 12px; border-top: 1px solid #1e1e2e; margin-top: 16px;';
+    section.innerHTML = `
+      <span style="font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;">// </span>
+      <span style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#e8e8f0;">${catLabels[lang][cat]}</span>
     `;
-    grid.appendChild(card);
+    grid.appendChild(section);
+
+    catStacks.forEach(s => {
+      const card = document.createElement('div');
+      card.className = 'card ' + s.cat;
+      card.innerHTML = `
+        <div class="card-header">
+          <span class="card-icon">${s.icon}</span>
+          <span class="card-category">${catLabels[lang][s.cat]}</span>
+        </div>
+        <div class="card-name">${s.name}</div>
+        <div class="card-subtitle">${s.sub}</div>
+        <div class="card-desc">${s.desc[lang]}</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;">${t.indicatedFor}</div>
+        <div class="card-desc" style="margin-bottom:16px;">${s.use[lang]}</div>
+        <div class="tags">${s.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
+        <div class="pros-cons">
+          <div class="pros">
+            <div class="pros-cons-title pro-title">${t.advantages}</div>
+            <ul>${s.pros[lang].map(p => `<li>${p}</li>`).join('')}</ul>
+          </div>
+          <div class="cons">
+            <div class="pros-cons-title con-title">${t.disadvantages}</div>
+            <ul>${s.cons[lang].map(c => `<li>${c}</li>`).join('')}</ul>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
   });
 }
 
@@ -561,6 +579,14 @@ function filter(cat) {
   document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('active'));
   event.currentTarget.classList.add('active');
   render(cat);
+  if (cat !== 'all') {
+    setTimeout(() => {
+      const section = document.getElementById('section-' + cat);
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 window.addEventListener('DOMContentLoaded', function() { setLang('en'); });

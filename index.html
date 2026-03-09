@@ -269,7 +269,7 @@
   <div class="header-top">
     <div>
       <div class="header-tag" id="header-tag">// referência técnica 2026</div>
-      <h1>Mapa de Stacks</h1>
+      <h1 id="main-title">Stacks Map</h1>
     </div>
     <div class="lang-toggle">
       <button class="lang-btn active" onclick="setLang('pt')" id="btn-pt">PT</button>
@@ -300,6 +300,13 @@ const stacks = [
     use:{en:'E-commerce, dashboards, SaaS apps, portals',pt:'E-commerces, dashboards, apps SaaS, portais'},
     pros:{en:['Huge ecosystem','Strong job market','Flexible and composable'],pt:['Ecossistema gigante','Mercado de trabalho forte','Flexível e componível']},
     cons:{en:['Not a complete framework','Pattern learning curve','Requires architecture decisions'],pt:['Não é um framework completo','Curva de aprendizado de padrões','Requer decisões de arquitetura']}
+  },
+  { cat:'fe', icon:'🔺', name:'Angular', sub:'Google · TypeScript Framework',
+    desc:{en:'Full opinionated framework by Google. TypeScript by default, dependency injection, RxJS and a complete CLI. Enterprise standard.',pt:'Framework completo e opinativo do Google. TypeScript por padrão, injeção de dependências, RxJS e CLI completa. Padrão enterprise.'},
+    tags:['TypeScript','RxJS','CLI','Enterprise'],
+    use:{en:'Large enterprise apps, corporate systems, teams that prefer conventions over decisions',pt:'Apps enterprise de grande porte, sistemas corporativos, times que preferem convenções a decisões'},
+    pros:{en:['Complete out of the box','Strong typing with TypeScript','Google backing'],pt:['Completo sem configurações extras','Tipagem forte com TypeScript','Suporte do Google']},
+    cons:{en:['Steep learning curve','Verbose boilerplate','Overkill for small projects'],pt:['Curva de aprendizado alta','Boilerplate verboso','Excessivo para projetos pequenos']}
   },
   { cat:'fullstack', icon:'▲', name:'Next.js', sub:'Vercel · React Framework',
     desc:{en:'Fullstack framework on top of React. Supports SSR, SSG and API Routes in one project. Nearly automatic deployment on Vercel.',pt:'Framework fullstack sobre React. Suporta SSR, SSG e API Routes no mesmo projeto. Deploy quase automático na Vercel.'},
@@ -428,6 +435,7 @@ let currentFilter = 'all';
 const i18n = {
   en: {
     headerTag: '// technical reference 2026',
+    mainTitle: 'Stacks Map',
     subtitle: 'Languages, frameworks and ecosystems — what they do, advantages and disadvantages',
     pythonNote: "⚠ Python is a general-purpose language, not a framework. Its classification depends on what's built on top of it: Django is fullstack, FastAPI is pure backend, Streamlit and Gradio are data tools.",
     legAll: 'ALL', legFe: 'FRONTEND', legBe: 'BACKEND', legFullstack: 'FULLSTACK', legMobile: 'MOBILE', legData: 'DATA & AI', legInfra: 'INFRA & DEVOPS',
@@ -436,6 +444,7 @@ const i18n = {
   },
   pt: {
     headerTag: '// referência técnica 2026',
+    mainTitle: 'Mapa de Stacks',
     subtitle: 'Linguagens, frameworks e ecossistemas — para que servem, vantagens e desvantagens',
     pythonNote: '⚠ Python é uma linguagem de propósito geral, não um framework. Sua classificação depende do que está sendo usado sobre ele: Django é fullstack, FastAPI é backend puro, Streamlit e Gradio são ferramentas de dados.',
     legAll: 'TODAS', legFe: 'FRONTEND', legBe: 'BACKEND', legFullstack: 'FULLSTACK', legMobile: 'MOBILE', legData: 'DADOS & IA', legInfra: 'INFRA & DEVOPS',
@@ -455,6 +464,7 @@ function setLang(lang) {
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
   const t = i18n[lang];
   document.getElementById('header-tag').textContent = t.headerTag;
+  document.getElementById('main-title').textContent = t.mainTitle;
   document.getElementById('subtitle').textContent = t.subtitle;
   document.getElementById('python-note').textContent = t.pythonNote;
   document.getElementById('leg-all').textContent = t.legAll;
@@ -517,7 +527,7 @@ function filter(cat) {
   render(cat);
 }
 
-setLang('pt');
+setLang('en');
 </script>
 
 <footer style="margin: 0; padding: 64px 48px; border-top: 1px solid #1e1e2e; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; background: #0d0d14;">

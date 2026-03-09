@@ -475,11 +475,11 @@ function setLang(lang) {
   document.getElementById('python-note').textContent = t.pythonNote;
   document.getElementById('leg-all').textContent = t.legAll;
   document.getElementById('leg-data').textContent = t.legData;
-  render();
+  render(currentFilter);
 }
 
-function render(filter = 'all') {
-  if (filter !== 'all' || currentFilter) currentFilter = filter;
+function render(filter) {
+  if (filter !== undefined) currentFilter = filter;
   const lang = currentLang;
   const t = i18n[lang];
   const grid = document.getElementById('grid');
